@@ -12791,6 +12791,9 @@
         },
         "generatingStatus": {
           "text": "جارٍ توليد الصورة..."
+        },
+        "stoppedStatus": {
+          "text": "تم إيقاف توليد الصورة"
         }
       },
       "memoizedLink": {

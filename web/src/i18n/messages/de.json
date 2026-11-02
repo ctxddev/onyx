@@ -12791,6 +12791,9 @@
         },
         "generatingStatus": {
           "text": "Bild wird generiert..."
+        },
+        "stoppedStatus": {
+          "text": "Bildgenerierung gestoppt"
         }
       },
       "memoizedLink": {

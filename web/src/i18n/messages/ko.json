@@ -12791,6 +12791,9 @@
         },
         "generatingStatus": {
           "text": "이미지 생성 중..."
+        },
+        "stoppedStatus": {
+          "text": "이미지 생성 중지됨"
         }
       },
       "memoizedLink": {
