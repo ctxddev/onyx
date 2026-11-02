@@ -1,13 +1,9 @@
 """The list of event-based sources, and the import that registers them.
 
-A source's spec, handler and search behaviour only exist once the module
-that declares them is imported, and nothing imports a source by accident:
-the connector registry loads source modules lazily, and the webhook server
-never loads them at all. So the modules are named here and imported on
-purpose.
-
-Add a source by appending its module path. That module registers itself at
-import time.
+A source's registrations only exist once its module is imported, and
+nothing imports one by accident: the connector registry loads lazily and
+the webhook server not at all. So the modules are named here and imported
+on purpose.
 """
 
 import importlib
@@ -37,10 +33,8 @@ _loaded = False
 def load_event_sources() -> None:
     """Import every event source so its registrations exist.
 
-    Called by the webhook server when it builds its routes, by the drain
-    before it reads the queue, and by the search path before it withholds a
-    source, because those run in different processes and each needs the
-    registrations. Safe to call repeatedly.
+    The webhook server, the drain and the search path each call it: they run
+    in different processes. Safe to call repeatedly.
     """
     global _loaded
     if _loaded:
