@@ -220,8 +220,9 @@ termination grace period is much shorter, so it ends running turns first
    `ChatRunStore.poll_control` cancels one run when its owner lease is lost or
    its `chat_response_stop:<id>` key is set. Cancellation reaches every run,
    child and tool, and `ChatTurnExecution._publish` drops packets after it. It
-   does not interrupt a blocked provider read or a running tool; the turn keeps
-   its admission until they return. The stop key is per stream ID, so a late
+   does not interrupt a blocked provider read or a tool that ignores its signal;
+   the turn keeps its admission until they return. MCP calls cancel their request
+   coroutine and drain it before returning ([[mcp-and-custom-tools#cancel-in-flight-request]]). The stop key is per stream ID, so a late
    stop cannot cancel the next message when the caller passes `stream_id`, as
    the web client does. Without `stream_id`, Stop targets the stream in flight
    at request time. Replay shows `user_cancelled` from the saved
