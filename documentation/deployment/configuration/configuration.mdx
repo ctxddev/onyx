@@ -272,6 +272,13 @@ Read [Deploying Craft](/deployment/local/craft) before enabling Craft in self-ho
     `ONYX_AIRGAPPED`: Set to `true` on deployments with no internet access.
     Onyx then skips the outbound fetches for the recommended-model catalog, the model price table,
     and release notes from GitHub.
+
+    `EXTRA_EVENT_SOURCE_MODULES`:
+    Comma-separated Python module paths for event-based connectors installed beside Onyx rather than shipped in it.
+    Each module registers itself when imported. Install the package so that the API server,
+    the webhook server and the docfetching worker can all import it; each loads these modules itself.
+    A path that cannot be imported is logged and skipped,
+    so one bad entry disables one connector rather than the deployment.
   </Accordion>
 
   <Accordion title="Craft Configuration">
