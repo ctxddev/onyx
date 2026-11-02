@@ -10,7 +10,12 @@ import { cn } from "@opal/utils";
 // Types
 // ---------------------------------------------------------------------------
 
-type TagSize = "sm" | "md";
+/**
+ * `"sm"` 16px and `"md"` 22px are Figma Tag Small and Regular. `"20"` and
+ * `"24"` (Figma Tag/Status Regular and Large) are named by height because
+ * Figma uses "Regular" for two heights.
+ */
+type TagSize = "sm" | "md" | "20" | "24";
 
 /**
  * - `"default"`: tinted background, icon and label in the color's text.

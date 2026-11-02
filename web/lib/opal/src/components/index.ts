@@ -132,6 +132,7 @@ export {
   Tag,
   TAG_COLORS,
   type TagProps,
+  type TagSize,
   type TagVariant,
   type TagColor,
 } from "@opal/components/tag/components";

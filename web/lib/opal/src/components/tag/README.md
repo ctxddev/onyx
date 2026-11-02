@@ -2,7 +2,7 @@
 
 **Import:** `import { Tag, type TagProps } from "@opal/components";`
 
-A small coloured label for status, category or metadata: an icon and a title in a tinted pill, drawn by a `Content` (`secondary` preset, `body` variant, so the title is `secondary-body`). It does nothing on click. 1rem tall at `sm`, 1.375rem at `md`.
+A small coloured label for status, category or metadata: an icon and a title in a tinted pill, drawn by a `Content` (`secondary` preset, `body` variant, so the title is `secondary-body`). It does nothing on click.
 
 For a removable, clickable or chip-field pill, use [`Chip`](../chip/README.md). For a hover tooltip, wrap the tag in `Tooltip`. `Tag` takes no DOM attributes, but its ref and the props a wrapping `Tooltip` or popover trigger injects still reach its root.
 
@@ -20,7 +20,16 @@ For a removable, clickable or chip-field pill, use [`Chip`](../chip/README.md). 
 | `icon`    | `IconFunctionComponent`            | —              | Optional icon before the title  |
 | `color`   | `TagColor`                         | `"gray"`       | Color variant                   |
 | `variant` | `"default" \| "status" \| "count"` | `"default"`    | How the color is applied        |
-| `size`    | `"sm" \| "md"`                     | `"sm"`         | Size (Figma Small / Regular)    |
+| `size`    | `"sm" \| "md" \| "20" \| "24"`     | `"sm"`         | Size, see the table below       |
+
+### `TagSize`
+
+| Size | Height | Padding | Radius | Figma   |
+| ---- | ------ | ------- | ------ | ------- |
+| `sm` | 16px   | 4px     | 4px    | Small   |
+| `md` | 22px   | 6px     | 6px    | Regular |
+| `20` | 20px   | 2px     | 4px    |         |
+| `24` | 24px   | 4px     | 8px    |         |
 
 ### `TagColor`
 
