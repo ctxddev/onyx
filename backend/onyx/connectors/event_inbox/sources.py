@@ -12,19 +12,10 @@ import time.
 
 import importlib
 
-from onyx.configs.constants import DocumentSource
-from onyx.connectors.event_inbox.handlers import (
-    event_handler_sources,
-    unregister_event_handler,
-)
-from onyx.connectors.event_inbox.source_registry import (
-    registered_webhook_sources,
-    unregister_webhook_source,
-    webhook_source_for,
-)
-from onyx.context.search.enrichment.registry import (
-    registered_enrichment_sources,
-    unregister_enrichment_source,
+from onyx.configs.app_configs import EXTRA_EVENT_SOURCE_MODULES
+from onyx.connectors.event_inbox.registration import (
+    claimed_event_sources,
+    unregister_event_source,
 )
 from onyx.utils.logger import setup_logger
 
@@ -32,27 +23,15 @@ logger = setup_logger()
 
 # Module paths, not objects: importing this list must not pull a source's SDK
 # into every process that only wants to know which sources exist.
-EVENT_SOURCE_MODULES: tuple[str, ...] = ()
+#
+# The ones shipped in this repository, then the ones a deployment installs
+# beside it. A source outside this repository needs no change here.
+_BUILT_IN_EVENT_SOURCE_MODULES: tuple[str, ...] = ()
+EVENT_SOURCE_MODULES: tuple[str, ...] = (
+    _BUILT_IN_EVENT_SOURCE_MODULES + EXTRA_EVENT_SOURCE_MODULES
+)
 
 _loaded = False
-
-
-def _claimed_sources() -> set[DocumentSource]:
-    """Every source that holds a registration of any kind."""
-    return (
-        {spec.source for spec in registered_webhook_sources()}
-        | registered_enrichment_sources()
-        | event_handler_sources()
-    )
-
-
-def _give_up(source: DocumentSource) -> None:
-    """Undo every registration one source holds."""
-    spec = webhook_source_for(source)
-    if spec is not None:
-        unregister_webhook_source(spec.slug)
-    unregister_enrichment_source(source)
-    unregister_event_handler(source)
 
 
 def load_event_sources() -> None:
@@ -68,7 +47,7 @@ def load_event_sources() -> None:
         return
 
     for module_path in EVENT_SOURCE_MODULES:
-        before = _claimed_sources()
+        before = claimed_event_sources()
         try:
             importlib.import_module(module_path)
         except Exception:
@@ -76,8 +55,8 @@ def load_event_sources() -> None:
             # between two of them. Drop only what it added, so one broken
             # source leaves the others alone: a missing route is better
             # than one serving a half-registered spec.
-            for source in _claimed_sources() - before:
-                _give_up(source)
+            for source in claimed_event_sources() - before:
+                unregister_event_source(source)
             logger.exception("Could not load event source %s", module_path)
 
     _loaded = True

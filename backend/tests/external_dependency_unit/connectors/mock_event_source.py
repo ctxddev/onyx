@@ -15,9 +15,8 @@ import json
 from collections.abc import Mapping
 
 from onyx.configs.constants import DocumentSource
-from onyx.connectors.event_inbox.handlers import register_event_handler
 from onyx.connectors.event_inbox.models import WebhookRequest, WebhookSourceSpec
-from onyx.connectors.event_inbox.source_registry import register_webhook_source
+from onyx.connectors.event_inbox.registration import register_event_source
 from onyx.connectors.event_models import EventParseResult, ParsedEvent
 from onyx.connectors.models import Document, TextSection
 from onyx.db.enums import ConnectorEventType
@@ -93,7 +92,10 @@ def to_document(
     )
 
 
-register_webhook_source(
-    WebhookSourceSpec(source=SOURCE, slug=SLUG, parser=parse, verifier=verify)
+# One call, the way a source outside this repository registers. No
+# permission filter: this source's documents are searchable like any other
+# connector's.
+register_event_source(
+    webhook=WebhookSourceSpec(source=SOURCE, slug=SLUG, parser=parse, verifier=verify),
+    handler=to_document,
 )
-register_event_handler(SOURCE, to_document)
