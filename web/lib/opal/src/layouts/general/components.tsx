@@ -52,6 +52,8 @@ interface SectionProps extends WithoutStyles<
   /** Inner padding, as a {@link Spacing} step (`N / 4` rem). @default 0 */
   padding?: Spacing;
   wrap?: boolean;
+  /** Spacing between wrapped lines, as a {@link Spacing} step. @default gap */
+  wrapGap?: Spacing;
 
   ref?: React.Ref<HTMLDivElement>;
 }
@@ -66,6 +68,7 @@ function Section({
   gap = 4,
   padding = 0,
   wrap,
+  wrapGap,
   ref,
   ...rest
 }: SectionProps) {
@@ -87,6 +90,10 @@ function Section({
       )}
       style={{
         gap: spacingToRem(gap),
+        ...(wrapGap !== undefined && {
+          [flexDirection === "row" ? "rowGap" : "columnGap"]:
+            spacingToRem(wrapGap),
+        }),
         padding: spacingToRem(padding),
         ...(typeof width === "number" && { width: `${width}rem` }),
         ...(typeof height === "number" && { height: `${height}rem` }),
