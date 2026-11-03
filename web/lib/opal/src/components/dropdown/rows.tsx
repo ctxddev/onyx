@@ -3,6 +3,7 @@
 import React from "react";
 import { LineItemButton } from "@opal/components/buttons/line-item-button/components";
 import { InputSwitch } from "@opal/components/inputs/booleans/input-switch/components";
+import { Text } from "@opal/components/text/components";
 import { rowElementId } from "@opal/components/dropdown/model";
 import type {
   DropdownMode,
@@ -126,6 +127,20 @@ export const Row = React.memo(function Row({
     description: row.description,
     suffix: row.kind === "option" ? row.suffix : undefined,
     tag: row.kind === "option" ? row.tag : undefined,
+    rightChildren:
+      row.kind === "option" && row.info ? (
+        <span className="opal-dropdown-info">
+          <Text
+            as="p"
+            font="secondary-body"
+            color="text-03"
+            textPosition="text-end"
+            wordWrap="whitespace-nowrap"
+          >
+            {row.info}
+          </Text>
+        </span>
+      ) : undefined,
     descriptionMaxLines:
       row.kind === "option" ? row.descriptionMaxLines : undefined,
     color: row.kind === "action" && row.danger ? "danger" : undefined,

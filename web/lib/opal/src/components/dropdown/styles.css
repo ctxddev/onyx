@@ -168,6 +168,10 @@
   @apply ms-2 flex shrink-0 items-center;
 }
 
+.opal-dropdown-info {
+  @apply ms-2 flex shrink-0 items-center self-center p-0.5;
+}
+
 .opal-dropdown-create-icon {
   @apply ms-2 h-4 w-4 shrink-0 text-text-03;
 }
