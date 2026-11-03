@@ -281,6 +281,7 @@ export default function LimitRow({
           wrap
           alignItems="start"
           gap={1}
+          wrapGap={2}
           height="auto"
         >
           <Section
@@ -304,7 +305,7 @@ export default function LimitRow({
               />
               <Section gap={0} alignItems="start" height="auto">
                 <Text font="secondary-body" color="text-03">
-                  {t(`row.period.options.${limit.period}.description`)}
+                  {t(`row.period.options.${limit.period}.helper`)}
                 </Text>
               </Section>
               {error === "duplicate" && (
@@ -362,6 +363,7 @@ export default function LimitRow({
             wrap
             alignItems="start"
             gap={1}
+            wrapGap={4}
             height="auto"
           >
             <Section
@@ -377,6 +379,8 @@ export default function LimitRow({
                   onChange={(costDollars) =>
                     onChange({ ...limit, costDollars })
                   }
+                  placeholder={t("row.cost.placeholder")}
+                  suffix={t("row.cost.suffix")}
                   disabled={disabled}
                 />
               </InputVertical>
@@ -411,7 +415,12 @@ export default function LimitRow({
                   }
                   min={1}
                   plain
-                  suffix={t("row.tokens.suffix")}
+                  valueSuffix={t("row.tokens.suffix")}
+                  suffix={
+                    limit.tokenThousands === null
+                      ? undefined
+                      : t("row.tokens.unit")
+                  }
                   placeholder={t("row.tokens.placeholder")}
                   disabled={disabled}
                 />
