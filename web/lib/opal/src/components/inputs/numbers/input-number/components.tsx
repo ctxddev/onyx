@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import "@opal/components/inputs/shared.css";
+import "@opal/components/inputs/numbers/input-number/styles.css";
 import { cn } from "@opal/utils";
 import { Button } from "@opal/components/buttons/button/components";
 import { Text } from "@opal/components";
@@ -73,6 +74,8 @@ export interface InputNumberProps {
   placeholder?: string;
   /** Unit text shown after the value, inside the field (e.g. "minutes"). */
   suffix?: string;
+  /** Muted text right against the value, like the "K" of "100K". Hidden while the field is empty. */
+  valueSuffix?: string;
   /** Applied to the input so a `<label htmlFor>` can target it. */
   id?: string;
   /** Whether leaving the field blank commits `null`. When false, a blank field settles to `defaultValue`, or gets its value back if there is none. */
@@ -105,6 +108,7 @@ export default function InputNumber({
   disabled = false,
   placeholder,
   suffix,
+  valueSuffix,
   id,
   allowEmpty = true,
   plain = false,
@@ -231,6 +235,36 @@ export default function InputNumber({
     onChange(val);
   };
 
+  const valueFont = plain ? "font-main-ui-mono" : "font-main-ui-body";
+  const input = (
+    <input
+      ref={inputRef}
+      id={id}
+      type="text"
+      // Numeric soft keyboards have no minus key.
+      inputMode={
+        allowsNegative ? undefined : decimalPlaces === 0 ? "numeric" : "decimal"
+      }
+      pattern={inputPattern}
+      disabled={isDisabled}
+      value={inputValue}
+      placeholder={placeholder}
+      // The default size (20 characters) would set the sizer's minimum width.
+      size={valueSuffix ? 1 : undefined}
+      aria-invalid={variant === "error" || undefined}
+      onChange={handleInputChange}
+      onBlur={settle}
+      onKeyDown={handleKeyDown}
+      className={cn(
+        "w-full h-6 bg-transparent py-0.5 ps-0.5 focus:outline-hidden disabled:cursor-not-allowed placeholder:!font-main-ui-muted placeholder:text-text-02",
+        // Flush against the value suffix.
+        valueSuffix ? "pe-0" : "pe-0.5",
+        valueFont,
+        INNER_CLASSES[variant]
+      )}
+    />
+  );
+
   return (
     // Pointer convenience only — this forwards a click to the input, which is
     // already keyboard reachable.
@@ -240,32 +274,29 @@ export default function InputNumber({
       data-variant={variant}
       onClick={() => inputRef.current?.focus()}
     >
-      <input
-        ref={inputRef}
-        id={id}
-        type="text"
-        // Numeric soft keyboards have no minus key.
-        inputMode={
-          allowsNegative
-            ? undefined
-            : decimalPlaces === 0
-              ? "numeric"
-              : "decimal"
-        }
-        pattern={inputPattern}
-        disabled={isDisabled}
-        value={inputValue}
-        placeholder={placeholder}
-        aria-invalid={variant === "error" || undefined}
-        onChange={handleInputChange}
-        onBlur={settle}
-        onKeyDown={handleKeyDown}
-        className={cn(
-          "w-full h-6 bg-transparent p-0.5 focus:outline-hidden disabled:cursor-not-allowed placeholder:!font-main-ui-muted placeholder:text-text-02",
-          plain ? "font-main-ui-mono" : "font-main-ui-body",
-          INNER_CLASSES[variant]
-        )}
-      />
+      {valueSuffix ? (
+        <span className="opal-input-number-value">
+          {/* The input grows with its text, so the suffix follows the value. */}
+          <span
+            className={cn("opal-input-number-sizer", valueFont)}
+            data-value={inputValue || placeholder || ""}
+          >
+            {input}
+          </span>
+          {inputValue !== "" && (
+            <span
+              className={cn(
+                valueFont,
+                isDisabled ? "text-text-01" : "text-text-02"
+              )}
+            >
+              {valueSuffix}
+            </span>
+          )}
+        </span>
+      ) : (
+        input
+      )}
 
       {/* A pointer press on the controls keeps focus in the input. Otherwise
           blur commits the typed value just before the control commits its own. */}

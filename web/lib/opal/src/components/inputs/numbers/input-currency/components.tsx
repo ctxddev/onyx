@@ -8,9 +8,9 @@ import type {
   CurrencyPrecision,
   InputVariants,
 } from "@opal/types";
+import { Text } from "@opal/components/text/components";
 import {
   SEGMENT_INPUT_PROPS,
-  SegmentSeparator,
   cleanPastedText,
   makeSegmentKeyDownHandler,
   toAsciiDigits,
@@ -117,6 +117,16 @@ function segmentWidth(text: string, placeholder: string): string {
   return `calc(${chars}ch + 4px)`;
 }
 
+// The symbol and decimal separator sit flush against the digits, so the
+// amount reads as one run ("$5000.00"); Text would pad them apart.
+function CurrencyMark({ children }: { children: string }) {
+  return (
+    <span className="opal-input-currency-mark" aria-hidden>
+      {children}
+    </span>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // InputCurrency
 // ---------------------------------------------------------------------------
@@ -142,8 +152,11 @@ interface InputCurrencyProps {
    */
   precision?: CurrencyPrecision;
 
-  /** Placeholders of the whole and fraction segments. */
-  placeholder?: { whole?: string; fraction?: string };
+  /** Shown over the empty field while it has no focus, like "No limit". */
+  placeholder?: string;
+
+  /** Muted text at the end of the field, like "USD". Hidden under the placeholder. */
+  suffix?: string;
 
   /** Error chrome. */
   error?: boolean;
@@ -154,7 +167,7 @@ interface InputCurrencyProps {
 }
 
 /**
- * InputCurrency: a segmented amount field (`$ [whole] . [fraction]`) on the
+ * InputCurrency: a segmented amount field (`$[whole].[fraction]`) on the
  * shared .opal-input chrome. The locale sets the symbol, its side and the
  * decimal separator. Edits report through onChange as they happen (an empty
  * field reports null); blur and Enter tidy the display.
@@ -165,6 +178,7 @@ function InputCurrency({
   currency = "USD",
   precision,
   placeholder,
+  suffix,
   error,
   disabled,
   id,
@@ -174,8 +188,8 @@ function InputCurrency({
   const maxFraction = resolvePrecision(precision, parts.fractionDigits);
   const minFraction = Math.min(parts.fractionDigits, maxFraction);
   const showFraction = maxFraction > 0;
-  const wholePlaceholder = placeholder?.whole ?? "0";
-  const fractionPlaceholder = placeholder?.fraction ?? "0".repeat(minFraction);
+  const wholePlaceholder = "0";
+  const fractionPlaceholder = "0".repeat(minFraction);
 
   const variant: InputVariants = disabled
     ? "disabled"
@@ -187,6 +201,7 @@ function InputCurrency({
     toSegments(value, maxFraction, minFraction)
   );
 
+  const [focused, setFocused] = React.useState(false);
   const wholeRef = React.useRef<HTMLInputElement>(null);
   const fractionRef = React.useRef<HTMLInputElement>(null);
 
@@ -342,10 +357,13 @@ function InputCurrency({
   // Tidy when focus leaves the whole field, not on intra-field moves.
   function handleRootBlur(e: React.FocusEvent<HTMLDivElement>) {
     if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+    setFocused(false);
     commit(segments);
   }
 
-  const symbol = <SegmentSeparator>{parts.symbol}</SegmentSeparator>;
+  const showPlaceholder =
+    !!placeholder && !focused && !segments.whole && !segments.fraction;
+  const symbol = <CurrencyMark>{parts.symbol}</CurrencyMark>;
 
   return (
     <div className="opal-input-segmented-root opal-input-currency">
@@ -353,6 +371,7 @@ function InputCurrency({
         role="presentation"
         className="opal-input opal-input-segmented"
         data-variant={variant}
+        onFocus={() => setFocused(true)}
         onBlur={handleRootBlur}
         // A click on the chrome, not on a segment, focuses the whole segment.
         onClick={(e) => {
@@ -365,7 +384,20 @@ function InputCurrency({
           className="opal-input-segmented-content"
           role="group"
           aria-label={strings.inputCurrencyAmount}
+          data-placeholder-shown={showPlaceholder || undefined}
         >
+          {/* The segments stay mounted under the placeholder, so a click or
+              Tab still lands in the whole segment and reveals them. */}
+          {showPlaceholder && (
+            <span className="opal-input-segmented-placeholder">
+              <Text
+                font="main-ui-muted"
+                color={disabled ? "text-01" : "text-02"}
+              >
+                {placeholder}
+              </Text>
+            </span>
+          )}
           {!parts.symbolAfter && symbol}
           {/* The number reads left to right on every page, like the digits it
               holds; the symbol outside it keeps the page's side. */}
@@ -399,7 +431,7 @@ function InputCurrency({
             />
             {showFraction && (
               <>
-                <SegmentSeparator>{parts.decimal}</SegmentSeparator>
+                <CurrencyMark>{parts.decimal}</CurrencyMark>
                 {/* raw-ok: segmented numeric fields have no Opal input primitive. The field chrome is the surrounding .opal-input. */}
                 <input
                   {...SEGMENT_INPUT_PROPS}
@@ -420,6 +452,16 @@ function InputCurrency({
             )}
           </span>
           {parts.symbolAfter && symbol}
+          {suffix && (
+            <span className="opal-input-currency-suffix">
+              <Text
+                font="main-ui-muted"
+                color={disabled ? "text-01" : "text-02"}
+              >
+                {suffix}
+              </Text>
+            </span>
+          )}
         </div>
       </div>
     </div>

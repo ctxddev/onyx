@@ -51,6 +51,37 @@ describe("display", () => {
     );
   });
 
+  it("shows the placeholder and hides the suffix only while empty and unfocused", async () => {
+    const user = setupUser();
+    const { rerender } = render(
+      <InputCurrency
+        value={null}
+        onChange={() => {}}
+        placeholder="No cost limit"
+        suffix="USD"
+      />
+    );
+    const content = screen.getByRole("group", { name: "Amount" });
+    expect(screen.getByText("No cost limit")).toBeVisible();
+    expect(content).toHaveAttribute("data-placeholder-shown");
+
+    await user.click(screen.getByLabelText("Whole amount"));
+    expect(screen.queryByText("No cost limit")).toBeNull();
+    expect(content).not.toHaveAttribute("data-placeholder-shown");
+
+    rerender(
+      <InputCurrency
+        value={5}
+        onChange={() => {}}
+        placeholder="No cost limit"
+        suffix="USD"
+      />
+    );
+    await user.tab();
+    expect(screen.queryByText("No cost limit")).toBeNull();
+    expect(screen.getByText("USD")).toBeInTheDocument();
+  });
+
   it("hides the fraction segment for a negative precision", () => {
     render(<InputCurrency value={3} onChange={() => {}} precision={-1} />);
     expect(screen.queryByLabelText("Fractional amount")).toBeNull();
